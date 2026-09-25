@@ -4,6 +4,7 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { Login } from './pages/Login';
 import { Setup } from './pages/Setup';
 import { Dashboard } from './pages/Dashboard';
+import { JoinLanding } from './pages/JoinLanding';
 
 function App() {
   const token = localStorage.getItem('turnkey_partner_token');
@@ -12,6 +13,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* Public Routes */}
+        <Route path="/join" element={<JoinLanding />} />
         <Route path="/login" element={<Login />} />
         <Route path="/setup" element={<Setup />} />
 

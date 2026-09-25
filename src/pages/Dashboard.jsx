@@ -82,15 +82,14 @@ export const Dashboard = () => {
     fetchDashboard();
   }, []);
 
-  const rawShareUrl =
-    data?.share_url ||
-    (data?.referral_code
-      ? `https://turnkeyexpense.com/join?ref=${data.referral_code}`
-      : '');
-  const shareUrl = rawShareUrl.replace(
-    /https?:\/\/api\.turnkeyexpense\.com/g,
-    'https://turnkeyexpense.com',
-  );
+  const baseUrl =
+    typeof window !== 'undefined' && window.location.origin
+      ? window.location.origin
+      : 'https://affiliate.turnkeyexpense.com';
+
+  const shareUrl = data?.referral_code
+    ? `${baseUrl}/join?ref=${data.referral_code}`
+    : (data?.share_url ? data.share_url.replace(/https?:\/\/[^/]+/g, baseUrl) : '');
 
   const handleCopyLink = () => {
     if (shareUrl) {

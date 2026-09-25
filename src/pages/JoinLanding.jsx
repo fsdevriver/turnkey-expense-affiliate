@@ -1,0 +1,125 @@
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Card, CardContent } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Building2, Sparkles, Copy, Check, Apple, Smartphone } from 'lucide-react';
+
+const ANDROID_PACKAGE = 'in.ramonathehost.turnkey.ramona';
+const IOS_APP_ID = '6747061221';
+
+export const JoinLanding = () => {
+  const [searchParams] = useSearchParams();
+  const code = (searchParams.get('ref') || '').trim().toUpperCase();
+  const [copied, setCopied] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
+  const [targetPlatform, setTargetPlatform] = useState(null);
+
+  const playStoreUrl = `https://play.google.com/store/apps/details?id=${ANDROID_PACKAGE}&referrer=ref_code%3D${encodeURIComponent(code)}`;
+  const appStoreUrl = `https://apps.apple.com/app/id${IOS_APP_ID}`;
+
+  useEffect(() => {
+    const ua = (navigator.userAgent || '').toLowerCase();
+    const isAndroid = /android/i.test(ua);
+    const isIOS = /iphone|ipad|ipod/i.test(ua);
+
+    if (isAndroid) {
+      setRedirecting(true);
+      setTargetPlatform('Google Play Store');
+      window.location.replace(playStoreUrl);
+      return;
+    }
+
+    if (isIOS) {
+      setRedirecting(true);
+      setTargetPlatform('App Store');
+      if (code && navigator.clipboard) {
+        navigator.clipboard.writeText(code).catch(() => {});
+      }
+      const timer = setTimeout(() => {
+        window.location.replace(appStoreUrl);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [code, playStoreUrl, appStoreUrl]);
+
+  const handleCopy = () => {
+    if (code) {
+      navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 bg-muted/30">
+      <Card className="w-full max-w-md shadow-xl border-border/60 text-center overflow-hidden">
+        <div className="bg-primary/10 p-6 flex flex-col items-center border-b border-primary/20">
+          <div className="w-14 h-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-md mb-3">
+            <Building2 className="h-7 w-7" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Turnkey Expense</h1>
+          <p className="text-xs text-muted-foreground mt-1">Smart Rental Property & Expense Management</p>
+        </div>
+
+        <CardContent className="p-6 space-y-6">
+          {redirecting ? (
+            <div className="py-6 space-y-3">
+              <div className="animate-spin rounded-full h-9 w-9 border-b-2 border-primary mx-auto"></div>
+              <p className="font-semibold text-foreground">Opening {targetPlatform}...</p>
+              <p className="text-xs text-muted-foreground">Your referral bonus has been applied automatically.</p>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-semibold border border-emerald-200 dark:border-emerald-800">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span>Referral Invitation</span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  You were invited to Turnkey Expense. Claim your instant bonus upon registration.
+                </p>
+              </div>
+
+              {code && (
+                <div className="p-4 rounded-xl bg-muted/60 border space-y-2">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Referral Bonus Code
+                  </span>
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="font-mono text-2xl font-bold tracking-widest text-primary">
+                      {code}
+                    </span>
+                    <Button variant="ghost" size="sm" onClick={handleCopy} className="h-8 px-2 text-xs gap-1">
+                      {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                      <span>{copied ? 'Copied' : 'Copy'}</span>
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-3 pt-2">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Download the mobile app to get started:
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <a href={appStoreUrl} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" className="w-full gap-2 h-11 text-xs">
+                      <Apple className="h-4 w-4" />
+                      <span>App Store</span>
+                    </Button>
+                  </a>
+                  <a href={playStoreUrl} target="_blank" rel="noopener noreferrer">
+                    <Button className="w-full gap-2 h-11 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
+                      <Smartphone className="h-4 w-4" />
+                      <span>Google Play</span>
+                    </Button>
+                  </a>
+                </div>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
