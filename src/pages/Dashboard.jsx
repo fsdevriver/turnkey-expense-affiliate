@@ -82,9 +82,19 @@ export const Dashboard = () => {
     fetchDashboard();
   }, []);
 
+  const rawShareUrl =
+    data?.share_url ||
+    (data?.referral_code
+      ? `https://turnkeyexpense.com/join?ref=${data.referral_code}`
+      : '');
+  const shareUrl = rawShareUrl.replace(
+    /https?:\/\/api\.turnkeyexpense\.com/g,
+    'https://turnkeyexpense.com',
+  );
+
   const handleCopyLink = () => {
-    if (data?.share_url) {
-      navigator.clipboard.writeText(data.share_url);
+    if (shareUrl) {
+      navigator.clipboard.writeText(shareUrl);
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
     }
@@ -139,8 +149,8 @@ export const Dashboard = () => {
     }
   };
 
-  const qrCodeUrl = data?.share_url
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(data.share_url)}`
+  const qrCodeUrl = shareUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(shareUrl)}`
     : null;
 
   return (
@@ -294,7 +304,7 @@ export const Dashboard = () => {
                       <Input
                         type="text"
                         readOnly
-                        value={data?.share_url || ''}
+                        value={shareUrl}
                         className="font-mono text-xs bg-muted/40"
                       />
                       <Button onClick={handleCopyLink} className="shrink-0 gap-1.5">
