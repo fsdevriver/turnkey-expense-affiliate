@@ -15,7 +15,7 @@ export const JoinLanding = () => {
   const [platform, setPlatform] = useState(null);
 
   const playStoreUrl = `https://play.google.com/store/apps/details?id=${ANDROID_PACKAGE}&referrer=ref_code%3D${encodeURIComponent(code)}`;
-  const marketIntentUrl = `intent://details?id=${ANDROID_PACKAGE}&referrer=ref_code%3D${encodeURIComponent(code)}#Intent;scheme=market;package=com.android.vending;end`;
+  const marketIntentUrl = `intent://details?id=${ANDROID_PACKAGE}&referrer=ref_code%3D${encodeURIComponent(code)}#Intent;scheme=market;package=com.android.vending;S.browser_fallback_url=${encodeURIComponent(playStoreUrl)};end`;
   const appStoreUrl = `https://apps.apple.com/app/id${IOS_APP_ID}`;
 
   useEffect(() => {
@@ -31,12 +31,10 @@ export const JoinLanding = () => {
     if (isAndroid) {
       setIsMobileDevice(true);
       setPlatform('android');
-      // Attempt opening Play Store via Android intent, with fallback to web URL
+      // Let Chrome handle the fallback only when the Play Store cannot launch.
+      // A timed web redirect also runs after a successful launch.
       try {
         window.location.href = marketIntentUrl;
-        setTimeout(() => {
-          window.location.href = playStoreUrl;
-        }, 1200);
       } catch {
         window.location.href = playStoreUrl;
       }
@@ -108,7 +106,7 @@ export const JoinLanding = () => {
                   <span>App Store</span>
                 </Button>
               </a>
-              <a href={platform === 'android' ? marketIntentUrl : playStoreUrl} target="_blank" rel="noopener noreferrer">
+              <a href={platform === 'android' ? marketIntentUrl : playStoreUrl}>
                 <Button className="w-full gap-2 h-11 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
                   <Smartphone className="h-4 w-4" />
                   <span>Google Play</span>
