@@ -4,7 +4,7 @@ import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Building2, Sparkles, Copy, Check, Apple, Smartphone } from 'lucide-react';
 
-const ANDROID_PACKAGE = 'in.ramonathehost.turnkey.ramona';
+const ANDROID_PACKAGE = 'com.turnKey.expense';
 const IOS_APP_ID = '6747061221';
 
 export const JoinLanding = () => {
