@@ -11,36 +11,41 @@ export const JoinLanding = () => {
   const [searchParams] = useSearchParams();
   const code = (searchParams.get('ref') || '').trim().toUpperCase();
   const [copied, setCopied] = useState(false);
-  const [redirecting, setRedirecting] = useState(false);
-  const [targetPlatform, setTargetPlatform] = useState(null);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const [platform, setPlatform] = useState(null);
 
   const playStoreUrl = `https://play.google.com/store/apps/details?id=${ANDROID_PACKAGE}&referrer=ref_code%3D${encodeURIComponent(code)}`;
+  const marketIntentUrl = `intent://details?id=${ANDROID_PACKAGE}&referrer=ref_code%3D${encodeURIComponent(code)}#Intent;scheme=market;package=com.android.vending;end`;
   const appStoreUrl = `https://apps.apple.com/app/id${IOS_APP_ID}`;
 
   useEffect(() => {
+    // Automatically copy referral code to clipboard
+    if (code && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).catch(() => {});
+    }
+
     const ua = (navigator.userAgent || '').toLowerCase();
     const isAndroid = /android/i.test(ua);
     const isIOS = /iphone|ipad|ipod/i.test(ua);
 
     if (isAndroid) {
-      setRedirecting(true);
-      setTargetPlatform('Google Play Store');
-      window.location.replace(playStoreUrl);
-      return;
-    }
-
-    if (isIOS) {
-      setRedirecting(true);
-      setTargetPlatform('App Store');
-      if (code && navigator.clipboard) {
-        navigator.clipboard.writeText(code).catch(() => {});
+      setIsMobileDevice(true);
+      setPlatform('android');
+      // Attempt opening Play Store via Android intent, with fallback to web URL
+      try {
+        window.location.href = marketIntentUrl;
+        setTimeout(() => {
+          window.location.href = playStoreUrl;
+        }, 1200);
+      } catch {
+        window.location.href = playStoreUrl;
       }
-      const timer = setTimeout(() => {
-        window.location.replace(appStoreUrl);
-      }, 800);
-      return () => clearTimeout(timer);
+    } else if (isIOS) {
+      setIsMobileDevice(true);
+      setPlatform('ios');
+      window.location.href = appStoreUrl;
     }
-  }, [code, playStoreUrl, appStoreUrl]);
+  }, [code, marketIntentUrl, playStoreUrl, appStoreUrl]);
 
   const handleCopy = () => {
     if (code) {
@@ -62,62 +67,55 @@ export const JoinLanding = () => {
         </div>
 
         <CardContent className="p-6 space-y-6">
-          {redirecting ? (
-            <div className="py-6 space-y-3">
-              <div className="animate-spin rounded-full h-9 w-9 border-b-2 border-primary mx-auto"></div>
-              <p className="font-semibold text-foreground">Opening {targetPlatform}...</p>
-              <p className="text-xs text-muted-foreground">Your referral bonus has been applied automatically.</p>
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-semibold border border-emerald-200 dark:border-emerald-800">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>Referral Invitation</span>
             </div>
-          ) : (
-            <>
-              <div className="space-y-2">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-semibold border border-emerald-200 dark:border-emerald-800">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span>Referral Invitation</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  You were invited to Turnkey Expense. Claim your instant bonus upon registration.
-                </p>
-              </div>
+            <p className="text-sm text-muted-foreground">
+              You were invited to Turnkey Expense. Install the app and claim your referral bonus upon sign up.
+            </p>
+          </div>
 
-              {code && (
-                <div className="p-4 rounded-xl bg-muted/60 border space-y-2">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    Referral Bonus Code
-                  </span>
-                  <div className="flex items-center justify-center gap-2">
-                    <span className="font-mono text-2xl font-bold tracking-widest text-primary">
-                      {code}
-                    </span>
-                    <Button variant="ghost" size="sm" onClick={handleCopy} className="h-8 px-2 text-xs gap-1">
-                      {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
-                      <span>{copied ? 'Copied' : 'Copy'}</span>
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              <div className="space-y-3 pt-2">
-                <p className="text-xs font-medium text-muted-foreground">
-                  Download the mobile app to get started:
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  <a href={appStoreUrl} target="_blank" rel="noopener noreferrer">
-                    <Button variant="outline" className="w-full gap-2 h-11 text-xs">
-                      <Apple className="h-4 w-4" />
-                      <span>App Store</span>
-                    </Button>
-                  </a>
-                  <a href={playStoreUrl} target="_blank" rel="noopener noreferrer">
-                    <Button className="w-full gap-2 h-11 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
-                      <Smartphone className="h-4 w-4" />
-                      <span>Google Play</span>
-                    </Button>
-                  </a>
-                </div>
+          {code && (
+            <div className="p-4 rounded-xl bg-muted/60 border space-y-2">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Referral Bonus Code
+              </span>
+              <div className="flex items-center justify-center gap-2">
+                <span className="font-mono text-2xl font-bold tracking-widest text-primary">
+                  {code}
+                </span>
+                <Button variant="ghost" size="sm" onClick={handleCopy} className="h-8 px-2 text-xs gap-1">
+                  {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                  <span>{copied ? 'Copied' : 'Copy'}</span>
+                </Button>
               </div>
-            </>
+              <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                ✓ Code copied to clipboard
+              </p>
+            </div>
           )}
+
+          <div className="space-y-3 pt-2">
+            <p className="text-xs font-medium text-muted-foreground">
+              {isMobileDevice ? 'Tap below if store did not open automatically:' : 'Download the mobile app to get started:'}
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <a href={appStoreUrl} target="_blank" rel="noopener noreferrer">
+                <Button variant={platform === 'ios' ? 'default' : 'outline'} className="w-full gap-2 h-11 text-xs">
+                  <Apple className="h-4 w-4" />
+                  <span>App Store</span>
+                </Button>
+              </a>
+              <a href={platform === 'android' ? marketIntentUrl : playStoreUrl} target="_blank" rel="noopener noreferrer">
+                <Button className="w-full gap-2 h-11 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
+                  <Smartphone className="h-4 w-4" />
+                  <span>Google Play</span>
+                </Button>
+              </a>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
