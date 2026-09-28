@@ -4,6 +4,8 @@ import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Building2, Sparkles, Copy, Check, Apple, Smartphone } from 'lucide-react';
 
+import api from '../services/api';
+
 const ANDROID_PACKAGE = 'com.turnKey.expense';
 const IOS_APP_ID = '6747061221';
 
@@ -22,17 +24,26 @@ export const JoinLanding = () => {
     const isAndroid = /android/i.test(ua);
     const isIOS = /iphone|ipad|ipod/i.test(ua);
 
+    // Track click on self-hosted backend by IP address
+    if (code) {
+      api.post('/referral/track-click', {
+        code,
+        platform: isAndroid ? 'android' : isIOS ? 'ios' : 'web',
+      }).catch(() => {});
+    }
+
     if (isAndroid) {
       setIsMobileDevice(true);
       setPlatform('android');
-      // Android: Immediate redirect to Google Play with install referrer
-      window.location.href = playStoreUrl;
+      // Instant Direct Store Redirect for Android
+      window.location.replace(playStoreUrl);
     } else if (isIOS) {
       setIsMobileDevice(true);
       setPlatform('ios');
-      // iOS: Do not auto-redirect without user gesture, because iOS blocks clipboard writes without a physical touch!
+      // Instant Direct Store Redirect for iOS (App Store)
+      window.location.replace(appStoreUrl);
     }
-  }, [playStoreUrl]);
+  }, [code, playStoreUrl, appStoreUrl]);
 
   const handleCopy = () => {
     if (code && navigator.clipboard && navigator.clipboard.writeText) {
