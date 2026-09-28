@@ -18,11 +18,6 @@ export const JoinLanding = () => {
   const appStoreUrl = `https://apps.apple.com/app/id${IOS_APP_ID}`;
 
   useEffect(() => {
-    // Automatically copy referral code to clipboard
-    if (code && navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(code).catch(() => {});
-    }
-
     const ua = (navigator.userAgent || '').toLowerCase();
     const isAndroid = /android/i.test(ua);
     const isIOS = /iphone|ipad|ipod/i.test(ua);
@@ -30,21 +25,33 @@ export const JoinLanding = () => {
     if (isAndroid) {
       setIsMobileDevice(true);
       setPlatform('android');
-      // Use the canonical listing URL and preserve the install referrer.
+      // Android: Immediate redirect to Google Play with install referrer
       window.location.href = playStoreUrl;
     } else if (isIOS) {
       setIsMobileDevice(true);
       setPlatform('ios');
-      window.location.href = appStoreUrl;
+      // iOS: Do not auto-redirect without user gesture, because iOS blocks clipboard writes without a physical touch!
     }
-  }, [code, playStoreUrl, appStoreUrl]);
+  }, [playStoreUrl]);
 
   const handleCopy = () => {
-    if (code) {
-      navigator.clipboard.writeText(code);
+    if (code && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).catch(() => {});
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
+  };
+
+  const handleIosClaim = () => {
+    // 1. Copy code with user touch gesture
+    if (code && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).catch(() => {});
+    }
+    setCopied(true);
+    // 2. Open App Store immediately
+    setTimeout(() => {
+      window.location.href = appStoreUrl;
+    }, 200);
   };
 
   return (
@@ -65,7 +72,7 @@ export const JoinLanding = () => {
               <span>Referral Invitation</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              You were invited to Turnkey Expense. Install the app and claim your referral bonus upon sign up.
+              You were invited to Turnkey Expense. Claim your instant bonus upon registration.
             </p>
           </div>
 
@@ -83,31 +90,46 @@ export const JoinLanding = () => {
                   <span>{copied ? 'Copied' : 'Copy'}</span>
                 </Button>
               </div>
-              <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
-                ✓ Code copied to clipboard
+              <p className="text-[11px] text-muted-foreground">
+                {copied ? '✓ Code copied to your clipboard' : 'Code will be applied to your account'}
               </p>
             </div>
           )}
 
-          <div className="space-y-3 pt-2">
-            <p className="text-xs font-medium text-muted-foreground">
-              {isMobileDevice ? 'Tap below if store did not open automatically:' : 'Download the mobile app to get started:'}
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <a href={appStoreUrl} target="_blank" rel="noopener noreferrer">
-                <Button variant={platform === 'ios' ? 'default' : 'outline'} className="w-full gap-2 h-11 text-xs">
-                  <Apple className="h-4 w-4" />
-                  <span>App Store</span>
-                </Button>
-              </a>
-              <a href={playStoreUrl}>
-                <Button className="w-full gap-2 h-11 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
-                  <Smartphone className="h-4 w-4" />
-                  <span>Google Play</span>
-                </Button>
-              </a>
+          {platform === 'ios' ? (
+            <div className="space-y-3 pt-2">
+              <Button
+                onClick={handleIosClaim}
+                className="w-full gap-2 h-12 text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md"
+              >
+                <Apple className="h-5 w-5" />
+                <span>Claim Bonus & Open App Store</span>
+              </Button>
+              <p className="text-[11px] text-muted-foreground">
+                Copies code to clipboard and opens the Apple App Store
+              </p>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-3 pt-2">
+              <p className="text-xs font-medium text-muted-foreground">
+                {isMobileDevice ? 'Tap below if store did not open automatically:' : 'Download the mobile app to get started:'}
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <a href={appStoreUrl} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" className="w-full gap-2 h-11 text-xs">
+                    <Apple className="h-4 w-4" />
+                    <span>App Store</span>
+                  </Button>
+                </a>
+                <a href={playStoreUrl}>
+                  <Button className="w-full gap-2 h-11 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
+                    <Smartphone className="h-4 w-4" />
+                    <span>Google Play</span>
+                  </Button>
+                </a>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
