@@ -6,8 +6,7 @@ import { Building2, Sparkles, Copy, Check, Apple, Smartphone } from 'lucide-reac
 
 import api from '../services/api';
 
-// const ANDROID_PACKAGE = 'com.turnKey.expense';
-const ANDROID_PACKAGE = 'com.turnkeyexpense.test';
+const ANDROID_PACKAGE = 'com.turnkeyexpense.dev';
 const IOS_APP_ID = '6747061221';
 
 export const JoinLanding = () => {
