@@ -47,11 +47,12 @@ export const Login = () => {
   // Step 1: Submit Phone Number / Check User
   const handleCheckPhone = async (e) => {
     if (e) e.preventDefault();
-    const cleanPhone = phone.trim();
-    if (!cleanPhone) {
+    const rawDigits = phone.replace(/\D/g, '');
+    if (!rawDigits) {
       setError('Please enter your registered phone number');
       return;
     }
+    const fullPhone = '+1' + rawDigits;
 
     try {
       setLoading(true);
@@ -59,7 +60,7 @@ export const Login = () => {
       setInfoMsg(null);
 
       const res = await api.post('/partner/check-identifier', {
-        identifier: cleanPhone,
+        identifier: fullPhone,
       });
 
       if (res.data?.success) {
@@ -94,7 +95,7 @@ export const Login = () => {
       setLoading(true);
       setError(null);
       const res = await api.post('/partner/login', {
-        identifier: phone.trim(),
+        identifier: '+1' + phone.replace(/\D/g, ''),
         password,
       });
 
@@ -223,22 +224,32 @@ export const Login = () => {
             </div>
           )}
 
-          {/* STEP 1: Phone Number Input with Next Arrow */}
+          {/* STEP 1: Phone Number Input with Fixed +1 and US Flag */}
           {step === 1 && (
             <form onSubmit={handleCheckPhone} className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-foreground">Phone Number</label>
                 <div className="flex gap-2">
-                  <Input
-                    type="tel"
-                    placeholder="e.g. +1 (555) 000-1234"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
-                    autoFocus
-                    className="flex-1"
-                  />
-                  <Button type="submit" disabled={loading || !phone.trim()} className="px-4">
+                  <div className="flex flex-1 items-center rounded-md border border-input bg-background shadow-xs focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary overflow-hidden transition-all">
+                    <div className="flex items-center gap-1.5 px-3 py-2 bg-muted/60 border-r border-input select-none shrink-0">
+                      <span className="text-base leading-none" role="img" aria-label="United States">🇺🇸</span>
+                      <span className="text-sm font-semibold text-foreground tracking-tight">+1</span>
+                    </div>
+                    <Input
+                      type="tel"
+                      placeholder="(267) 342-5844"
+                      value={phone}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const clean = val.replace(/^\+?1\s*/, '');
+                        setPhone(clean);
+                      }}
+                      required
+                      autoFocus
+                      className="border-0 shadow-none focus-visible:ring-0 px-3 h-10 w-full rounded-none"
+                    />
+                  </div>
+                  <Button type="submit" disabled={loading || !phone.trim()} className="px-4 h-10">
                     {loading ? (
                       <span className="animate-spin text-sm">⋯</span>
                     ) : (
@@ -254,7 +265,7 @@ export const Login = () => {
           {step === 'password' && (
             <form onSubmit={handleLoginExisting} className="space-y-4">
               <div className="flex items-center justify-between text-sm bg-muted/50 p-2.5 rounded-lg border">
-                <span className="font-medium text-foreground">{phone}</span>
+                <span className="font-medium text-foreground">{phone.startsWith("+1") ? phone : "+1 " + phone}</span>
                 <button
                   type="button"
                   onClick={handleReset}
@@ -286,7 +297,7 @@ export const Login = () => {
           {step === 'otp' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between text-sm bg-muted/50 p-2.5 rounded-lg border">
-                <span className="font-medium text-foreground">{phone}</span>
+                <span className="font-medium text-foreground">{phone.startsWith("+1") ? phone : "+1 " + phone}</span>
                 <button
                   type="button"
                   onClick={handleReset}
@@ -330,7 +341,7 @@ export const Login = () => {
           {step === 'setPassword' && (
             <form onSubmit={handleSetPasswordAndLogin} className="space-y-4">
               <div className="flex items-center justify-between text-sm bg-muted/50 p-2.5 rounded-lg border">
-                <span className="font-medium text-foreground">{phone}</span>
+                <span className="font-medium text-foreground">{phone.startsWith("+1") ? phone : "+1 " + phone}</span>
                 <span className="text-xs text-emerald-600 flex items-center font-medium">
                   <ShieldCheck className="h-3.5 w-3.5 mr-1" /> Verified
                 </span>
