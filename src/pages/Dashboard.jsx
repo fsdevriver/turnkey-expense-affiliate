@@ -155,14 +155,14 @@ export const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 border-b bg-card">
+      <header className="sticky top-0 z-50 border-b border-border/80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold">
+            <div className="w-8 h-8 rounded-lg bg-emerald-700/10 text-emerald-700 flex items-center justify-center font-bold">
               <Building2 className="h-5 w-5" />
             </div>
             <span className="font-bold text-lg text-foreground tracking-tight">TURNKEY Affiliate</span>
-            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs hidden sm:inline-flex">
+            <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs hidden sm:inline-flex">
               Portal
             </Badge>
           </div>

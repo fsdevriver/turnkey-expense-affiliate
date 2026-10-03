@@ -21,7 +21,7 @@ export const Setup = () => {
   const handleRequestOtp = async (e) => {
     e.preventDefault();
     if (!identifier.trim()) {
-      setError('Please enter your registered phone number or email');
+      setError('Please enter your registered phone / email');
       return;
     }
 
@@ -124,7 +124,7 @@ export const Setup = () => {
                   required
                 />
                 <p className="text-xs text-muted-foreground">
-                  Enter the phone number or email registered by the administrator.
+                  Enter the phone / email.
                 </p>
               </div>
 
