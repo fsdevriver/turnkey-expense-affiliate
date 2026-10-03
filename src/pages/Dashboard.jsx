@@ -155,23 +155,45 @@ export const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-50 border-b border-border/80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 h-16 flex items-center shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-emerald-700/10 text-emerald-700 flex items-center justify-center font-bold">
-              <Building2 className="h-5 w-5" />
+            <div className="h-9 w-9 rounded-lg bg-emerald-700 flex items-center justify-center text-white font-bold text-base shadow-sm">
+              TK
             </div>
-            <span className="font-bold text-lg text-foreground tracking-tight">TURNKEY Affiliate</span>
-            <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs hidden sm:inline-flex">
-              Portal
-            </Badge>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-lg tracking-tight text-slate-900 dark:text-slate-50">
+                TURNKEY<span className="text-emerald-700 dark:text-emerald-400 font-semibold text-sm ml-1">Affiliate</span>
+              </span>
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800">
+                Partner Portal
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-muted-foreground hidden sm:inline">
-              {data?.name} ({data?.phone})
-            </span>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground">
-              <LogOut className="h-4 w-4 mr-1.5" /> Sign Out
+
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-full bg-emerald-100 text-emerald-800 font-semibold flex items-center justify-center text-sm border border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800 shrink-0">
+                {data?.name?.charAt(0)?.toUpperCase() || 'P'}
+              </div>
+              <div className="hidden sm:flex flex-col text-left">
+                <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 leading-tight">
+                  {data?.name || 'Partner'}
+                </span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+                  {data?.phone || ''}
+                </span>
+              </div>
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLogout}
+              className="text-xs h-8 px-2.5 border-slate-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:border-slate-800 dark:hover:bg-red-950/50 dark:hover:text-red-400 dark:hover:border-red-900 transition-colors"
+            >
+              <LogOut className="h-3.5 w-3.5 mr-1" />
+              <span>Sign Out</span>
             </Button>
           </div>
         </div>
