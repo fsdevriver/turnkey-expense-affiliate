@@ -72,7 +72,7 @@ export const Login = () => {
         } else {
           // New user -> OTP was dispatched
           setMaskedEmail(res.data.email_masked || '');
-          setInfoMsg(res.data.message || 'Verification code sent to your registered email.');
+          setInfoMsg(res.data.message || 'Verification code sent to your registered phone.');
           setStep('otp');
         }
       }
@@ -127,7 +127,7 @@ export const Login = () => {
       setLoading(true);
       setError(null);
       const res = await api.post('/partner/verify-setup-otp-only', {
-        identifier: phone.trim(),
+        identifier: phone.startsWith('+1') ? phone : '+1' + phone.replace(/\D/g, ''),
         otp: code,
       });
 
@@ -148,7 +148,7 @@ export const Login = () => {
       setLoading(true);
       setError(null);
       const res = await api.post('/partner/request-setup-otp', {
-        identifier: phone.trim(),
+        identifier: phone.startsWith('+1') ? phone : '+1' + phone.replace(/\D/g, ''),
       });
       if (res.data?.success) {
         setInfoMsg(res.data.message || 'New verification code sent!');
@@ -176,7 +176,7 @@ export const Login = () => {
       setLoading(true);
       setError(null);
       const res = await api.post('/partner/verify-setup-otp', {
-        identifier: phone.trim(),
+        identifier: phone.startsWith('+1') ? phone : '+1' + phone.replace(/\D/g, ''),
         otp: otp.trim(),
         password: newPassword,
       });
@@ -204,7 +204,7 @@ export const Login = () => {
           <CardDescription>
             {step === 1 && 'Enter your registered phone number to sign in'}
             {step === 'password' && `Welcome back, ${partnerName || 'Partner'}! Enter your password.`}
-            {step === 'otp' && 'Enter the 6-digit verification code sent to your email'}
+            {step === 'otp' && 'Enter the 6-digit verification code sent to your phone (or email)'}
             {step === 'setPassword' && 'Create your password to complete activation'}
           </CardDescription>
         </CardHeader>
