@@ -24,11 +24,23 @@ export const JoinLanding = () => {
     const isAndroid = /android/i.test(ua);
     const isIOS = /iphone|ipad|ipod/i.test(ua);
 
-    // Track click on self-hosted backend by IP address
+    // Track click on self-hosted backend with device fingerprinting
     if (code) {
+      const screenW = Math.round(window.screen.width || 0);
+      const screenH = Math.round(window.screen.height || 0);
+      const ratio = Number(window.devicePixelRatio || 1).toFixed(1);
+      let timezone = '';
+      try {
+        timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      } catch (e) {}
+
       api.post('/referral/track-click', {
         code,
-        platform: isAndroid ? 'android' : isIOS ? 'ios' : 'web',
+        platform: isAndroid ? 'android' : isIOS ? 'ios' : 'desktop',
+        screenWidth: screenW,
+        screenHeight: screenH,
+        pixelRatio: ratio,
+        timezone,
       }).catch(() => {});
     }
 
