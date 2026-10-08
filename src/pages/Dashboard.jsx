@@ -116,8 +116,12 @@ export const Dashboard = () => {
   const handleSubmitPayout = async (e) => {
     e.preventDefault();
     const amount = parseFloat(payoutAmount);
-    if (!amount || amount < (data?.min_payout_amount || 50)) {
-      setError(`Minimum withdrawal amount is $${data?.min_payout_amount || 50}`);
+    if (!amount || amount <= 0) {
+      setError('Please enter a valid withdrawal amount');
+      return;
+    }
+    if (amount > (data?.wallet_balance || 0)) {
+      setError('Withdrawal amount cannot exceed your wallet balance');
       return;
     }
     if (!accountInfo.trim()) {
@@ -432,13 +436,13 @@ export const Dashboard = () => {
 
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">
-                Withdrawal Amount ($) (Min: ${data?.min_payout_amount || 50})
+                Withdrawal Amount ($)
               </label>
               <Input
                 type="number"
                 step="0.01"
                 max={data?.wallet_balance}
-                placeholder="50.00"
+                placeholder="0.00"
                 value={payoutAmount}
                 onChange={(e) => setPayoutAmount(e.target.value)}
                 required
