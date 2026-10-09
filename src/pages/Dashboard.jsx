@@ -290,7 +290,7 @@ export const Dashboard = () => {
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground mt-4 pt-3 border-t">
-                    Earned instantly upon referee mobile signup
+                    Credited upon referee's first recorded expense
                   </p>
                 </CardContent>
               </Card>
@@ -384,32 +384,51 @@ export const Dashboard = () => {
                     <TableRow>
                       <TableHead>Referee Name</TableHead>
                       <TableHead>Phone Number</TableHead>
-                      <TableHead>Bonus Earned</TableHead>
-                      <TableHead className="text-right">Registration Date</TableHead>
+                      <TableHead>Bonus</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Date</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {!data?.referrals || data.referrals.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                        <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                           No referrals recorded yet. Start sharing your link or QR code!
                         </TableCell>
                       </TableRow>
                     ) : (
-                      data.referrals.map((r) => (
-                        <TableRow key={r.id}>
-                          <TableCell className="font-semibold text-foreground">{r.referee_name}</TableCell>
-                          <TableCell className="text-muted-foreground">{r.referee_phone}</TableCell>
-                          <TableCell>
-                            <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                              +${Number(r.bonus_earned).toFixed(2)}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-right text-muted-foreground text-xs">
-                            {r.date ? new Date(r.date).toLocaleDateString() : 'N/A'}
-                          </TableCell>
-                        </TableRow>
-                      ))
+                      data.referrals.map((r) => {
+                        const isCompleted = r.status === 'completed';
+                        return (
+                          <TableRow key={r.id}>
+                            <TableCell className="font-semibold text-foreground">{r.referee_name}</TableCell>
+                            <TableCell className="text-muted-foreground font-mono text-xs">{r.referee_phone}</TableCell>
+                            <TableCell>
+                              <span className={`font-bold ${isCompleted ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                                +${Number(r.bonus_earned).toFixed(2)}
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              {isCompleted ? (
+                                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800 text-[11px]">
+                                  Completed
+                                </Badge>
+                              ) : r.status === 'pending_monthly_cap' ? (
+                                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800 text-[11px]">
+                                  Next Month Budget
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800 text-[11px]">
+                                  Awaiting 1st Expense
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right text-muted-foreground text-xs">
+                              {r.date ? new Date(r.date).toLocaleDateString() : 'N/A'}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
                     )}
                   </TableBody>
                 </Table>

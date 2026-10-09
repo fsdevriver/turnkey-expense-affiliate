@@ -95,7 +95,7 @@ export const JoinLanding = () => {
               <span>Referral Invitation</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              You were invited to Turnkey Expense. Claim your instant bonus upon registration.
+              You were invited to Turnkey Expense. Claim your bonus after signing up and adding your first expense.
             </p>
           </div>
 
