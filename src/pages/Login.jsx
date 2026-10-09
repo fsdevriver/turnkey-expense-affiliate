@@ -237,7 +237,7 @@ export const Login = () => {
                     </div>
                     <Input
                       type="tel"
-                      placeholder="(267) 342-5844"
+                      placeholder="(555) 000-0000"
                       value={phone}
                       onChange={(e) => {
                         const val = e.target.value;
