@@ -34,6 +34,8 @@ import {
   CheckCircle2,
   DollarSign,
   Building2,
+  Calendar,
+  Hourglass,
 } from 'lucide-react';
 
 export const Dashboard = () => {
@@ -233,7 +235,7 @@ export const Dashboard = () => {
         ) : (
           <>
             {/* Stat Cards */}
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -259,6 +261,31 @@ export const Dashboard = () => {
                 </CardContent>
               </Card>
 
+              {/* Reserved / Next Month Bonus Card */}
+              <Card className="border-purple-200/70 dark:border-purple-900/50 bg-gradient-to-br from-purple-50/50 via-white to-white dark:from-purple-950/20 dark:via-background dark:to-background">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-purple-700 dark:text-purple-300">Reserved for Next Month</p>
+                      <p className="text-3xl font-bold text-purple-700 dark:text-purple-400 mt-2">
+                        +${Number(data?.pending_monthly_bonus || 0).toFixed(2)}
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-purple-100/70 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300">
+                      <Calendar className="h-6 w-6" />
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-4 pt-3 border-t border-purple-100 dark:border-purple-900/30 flex items-center justify-between">
+                    <span>Unlocks automatically 1st of month</span>
+                    {Number(data?.waiting_expense_bonus || 0) > 0 && (
+                      <span className="text-amber-600 font-medium">
+                        +${Number(data?.waiting_expense_bonus).toFixed(2)} awaiting exp.
+                      </span>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -271,7 +298,7 @@ export const Dashboard = () => {
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground mt-4 pt-3 border-t">
-                    Verified registered mobile app accounts
+                    {data?.total_completed || 0} completed · {data?.total_pending || 0} pending
                   </p>
                 </CardContent>
               </Card>
@@ -285,7 +312,7 @@ export const Dashboard = () => {
                         ${data?.bonus_per_referral} <span className="text-sm font-normal text-muted-foreground">/ referee ${data?.user_bonus_received}</span>
                       </p>
                     </div>
-                    <div className="p-3 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600">
+                    <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600">
                       <Gift className="h-6 w-6" />
                     </div>
                   </div>
