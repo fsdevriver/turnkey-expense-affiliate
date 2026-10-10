@@ -498,6 +498,7 @@ export const Dashboard = () => {
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">Payment Method</label>
               <Select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+                <option value="tremendous">Tremendous Digital Reward (Visa / Prepaid / Gift Card)</option>
                 <option value="bank_transfer">Bank Transfer (ACH / Wire)</option>
                 <option value="paypal">PayPal</option>
                 <option value="zelle">Zelle</option>
