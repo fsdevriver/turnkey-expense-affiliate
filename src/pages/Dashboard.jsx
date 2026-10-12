@@ -36,6 +36,9 @@ import {
   Building2,
   Calendar,
   Hourglass,
+  Clock,
+  ExternalLink,
+  ArrowUpRight,
 } from 'lucide-react';
 
 export const Dashboard = () => {
@@ -452,6 +455,117 @@ export const Dashboard = () => {
                             </TableCell>
                             <TableCell className="text-right text-muted-foreground text-xs">
                               {r.date ? new Date(r.date).toLocaleDateString() : 'N/A'}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+
+            {/* Payout & Withdrawal History Table */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Withdrawal & Payout History</CardTitle>
+                  <CardDescription>Track all submitted payout requests, processing status, and reward redemptions</CardDescription>
+                </div>
+                {data?.payouts && data.payouts.length > 0 && (
+                  <Badge variant="outline" className="font-mono text-xs">
+                    {data.payouts.length} {data.payouts.length === 1 ? 'request' : 'requests'}
+                  </Badge>
+                )}
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Payment Method</TableHead>
+                      <TableHead>Account Details</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Note / Reward</TableHead>
+                      <TableHead className="text-right">Requested At</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {!data?.payouts || data.payouts.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                          No withdrawal requests found. When you request a payout, status and redemptions will appear here.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      data.payouts.map((p) => {
+                        const status = (p.status || 'pending').toLowerCase();
+                        const isPaid = status === 'paid' || status === 'approved';
+                        const isRejected = status === 'rejected';
+
+                        const methodDisplay =
+                          p.payment_method === 'tremendous'
+                            ? 'Tremendous Reward'
+                            : p.payment_method === 'bank_transfer'
+                            ? 'Bank Transfer'
+                            : p.payment_method === 'paypal'
+                            ? 'PayPal'
+                            : p.payment_method === 'zelle'
+                            ? 'Zelle'
+                            : p.payment_method || 'N/A';
+
+                        return (
+                          <TableRow key={p.id}>
+                            <TableCell>
+                              <span className="font-bold text-foreground text-base">
+                                ${Number(p.amount).toFixed(2)}
+                              </span>
+                            </TableCell>
+                            <TableCell className="font-medium text-xs text-muted-foreground">
+                              {methodDisplay}
+                            </TableCell>
+                            <TableCell className="text-xs max-w-[200px] truncate text-muted-foreground" title={p.account_info}>
+                              {p.account_info || '—'}
+                            </TableCell>
+                            <TableCell>
+                              {isPaid ? (
+                                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800 text-[11px]">
+                                  Paid
+                                </Badge>
+                              ) : isRejected ? (
+                                <Badge variant="outline" className="bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800 text-[11px]">
+                                  Rejected
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800 text-[11px]">
+                                  Pending
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-xs">
+                              <div className="space-y-1">
+                                {p.reward_url && (
+                                  <a
+                                    href={p.reward_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 font-semibold text-emerald-600 hover:text-emerald-700 hover:underline"
+                                  >
+                                    Claim Reward <ArrowUpRight className="h-3 w-3" />
+                                  </a>
+                                )}
+                                {p.admin_note && (
+                                  <p className="text-[11px] text-muted-foreground italic">
+                                    {p.admin_note}
+                                  </p>
+                                )}
+                                {!p.reward_url && !p.admin_note && (
+                                  <span className="text-muted-foreground">—</span>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right text-muted-foreground text-xs whitespace-nowrap">
+                              {p.created_at ? new Date(p.created_at).toLocaleDateString() : 'N/A'}
                             </TableCell>
                           </TableRow>
                         );
