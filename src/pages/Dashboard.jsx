@@ -51,8 +51,7 @@ export const Dashboard = () => {
   // Payout Request State
   const [showPayoutModal, setShowPayoutModal] = useState(false);
   const [payoutAmount, setPayoutAmount] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('bank_transfer');
-  const [accountInfo, setAccountInfo] = useState('');
+  const [payoutEmail, setPayoutEmail] = useState('');
   const [payoutLoading, setPayoutLoading] = useState(false);
   const [payoutMsg, setPayoutMsg] = useState(null);
 
@@ -70,6 +69,9 @@ export const Dashboard = () => {
       const res = await api.get('/partner/dashboard');
       if (res.data?.success) {
         setData(res.data.data);
+        if (res.data.data?.email && !payoutEmail) {
+          setPayoutEmail(res.data.data.email);
+        }
       }
     } catch (err) {
       if (err.response?.status === 401) {
@@ -129,8 +131,9 @@ export const Dashboard = () => {
       setError('Withdrawal amount cannot exceed your wallet balance');
       return;
     }
-    if (!accountInfo.trim()) {
-      setError('Please provide your bank or payout account details');
+    const email = payoutEmail.trim();
+    if (!email || !email.includes('@')) {
+      setError('Please enter a valid payout delivery email address to receive your reward');
       return;
     }
 
@@ -139,15 +142,14 @@ export const Dashboard = () => {
       setError(null);
       const res = await api.post('/partner/payout-request', {
         amount,
-        payment_method: paymentMethod,
-        account_info: accountInfo.trim(),
+        payment_method: 'Tremendous Digital Reward',
+        account_info: email,
       });
 
       if (res.data?.success) {
-        setPayoutMsg('Payout request submitted successfully!');
+        setPayoutMsg(`Payout request for $${amount.toFixed(2)} submitted successfully! It will be delivered to ${email}.`);
         setShowPayoutModal(false);
         setPayoutAmount('');
-        setAccountInfo('');
         fetchDashboard();
       }
     } catch (err) {
@@ -610,27 +612,19 @@ export const Dashboard = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Payment Method</label>
-              <Select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-                <option value="tremendous">Tremendous Digital Reward (Visa / Prepaid / Gift Card)</option>
-                <option value="bank_transfer">Bank Transfer (ACH / Wire)</option>
-                <option value="paypal">PayPal</option>
-                <option value="zelle">Zelle</option>
-              </Select>
-            </div>
-
-            <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">
-                Account & Routing Details
+                Payout Delivery Email
               </label>
-              <textarea
-                className="w-full min-h-[80px] rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                rows="3"
-                placeholder="e.g. Bank Name, Routing Number, Account Number, Account Name"
-                value={accountInfo}
-                onChange={(e) => setAccountInfo(e.target.value)}
+              <Input
+                type="email"
+                placeholder="your.email@example.com"
+                value={payoutEmail}
+                onChange={(e) => setPayoutEmail(e.target.value)}
                 required
               />
+              <p className="text-xs text-muted-foreground pt-1">
+                Your payout will be sent via <strong>Tremendous Digital Reward</strong> (Virtual Visa, Prepaid Card, or Gift Card) directly to this email.
+              </p>
             </div>
 
             <DialogFooter className="pt-2">
