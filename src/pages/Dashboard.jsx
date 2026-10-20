@@ -178,10 +178,11 @@ export const Dashboard = () => {
         }
       }
 
-      // If payout was approved/rejected or bonus was credited, refresh dashboard metrics in realtime
+      // If payout was approved/rejected, bonus was credited, or a new referral signed up, refresh dashboard metrics in realtime
       if (
         event.event === 'payout.updated' ||
         event.event === 'referral.completed' ||
+        event.event === 'referral.created' ||
         event.event === 'payout.created'
       ) {
         fetchDashboard();
