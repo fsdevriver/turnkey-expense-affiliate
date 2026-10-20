@@ -440,9 +440,12 @@ export const Dashboard = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Available Wallet Balance</p>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Available Earnings</p>
                       <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mt-2">
-                        ${Number(data?.wallet_balance || 0).toFixed(2)}
+                        ${Number(data?.current_earnings ?? data?.wallet_balance ?? 0).toFixed(2)}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Total Earned: <span className="font-semibold text-foreground">${Number(data?.total_earnings ?? data?.wallet_balance ?? 0).toFixed(2)}</span>
                       </p>
                     </div>
                     <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600">
