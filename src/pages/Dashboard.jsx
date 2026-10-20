@@ -39,7 +39,12 @@ import {
   Clock,
   ExternalLink,
   ArrowUpRight,
+  Bell,
 } from 'lucide-react';
+import {
+  subscribeToRealtimeEvents,
+  requestNotificationPermission,
+} from '../services/realtime';
 
 export const Dashboard = () => {
   const [data, setData] = useState(null);
@@ -55,8 +60,71 @@ export const Dashboard = () => {
   const [payoutLoading, setPayoutLoading] = useState(false);
   const [payoutMsg, setPayoutMsg] = useState(null);
 
+  // Notification State
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
+  const notifDropdownRef = React.useRef(null);
+
   const navigate = useNavigate();
   const token = localStorage.getItem('turnkey_partner_token');
+
+  // Play subtle chime on new notification
+  const playChime = () => {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.35);
+    } catch {
+      // AudioContext not allowed or unsupported
+    }
+  };
+
+  const fetchNotifications = async () => {
+    if (!token) return;
+    try {
+      const res = await api.get('/notifications/partner?limit=15');
+      if (res.data?.success && res.data?.data) {
+        setNotifications(res.data.data.items || []);
+        setUnreadCount(res.data.data.unreadCount || res.data.data.unread_count || 0);
+      }
+    } catch (err) {
+      console.warn('Failed to load partner notifications:', err);
+    }
+  };
+
+  const markItemAsRead = async (id) => {
+    try {
+      await api.patch(`/notifications/partner/${id}/read`);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_read: true, isRead: true } : n))
+      );
+      setUnreadCount((c) => Math.max(0, c - 1));
+    } catch (err) {
+      console.warn('Failed to mark notification read:', err);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      await api.patch('/notifications/partner/read-all');
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, is_read: true, isRead: true }))
+      );
+      setUnreadCount(0);
+    } catch (err) {
+      console.warn('Failed to mark all notifications read:', err);
+    }
+  };
 
   const fetchDashboard = async () => {
     if (!token) {
@@ -87,6 +155,43 @@ export const Dashboard = () => {
 
   useEffect(() => {
     fetchDashboard();
+    fetchNotifications();
+    requestNotificationPermission();
+
+    // Close notifications dropdown on outside click
+    const handleOutsideClick = (e) => {
+      if (notifDropdownRef.current && !notifDropdownRef.current.contains(e.target)) {
+        setNotifDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+
+    // Subscribe to SSE realtime events
+    const unsubscribe = subscribeToRealtimeEvents((event) => {
+      // If notification is for partner
+      if (event.event === 'notification.new') {
+        const notif = event.data;
+        if (notif && (notif.role === 'partner' || notif.role === 'all')) {
+          setNotifications((prev) => [notif, ...prev.filter((n) => n.id !== notif.id)]);
+          setUnreadCount((c) => c + 1);
+          playChime();
+        }
+      }
+
+      // If payout was approved/rejected or bonus was credited, refresh dashboard metrics in realtime
+      if (
+        event.event === 'payout.updated' ||
+        event.event === 'referral.completed' ||
+        event.event === 'payout.created'
+      ) {
+        fetchDashboard();
+      }
+    });
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      unsubscribe();
+    };
   }, []);
 
   const baseUrl =
@@ -183,6 +288,95 @@ export const Dashboard = () => {
           </div>
 
           <div className="flex items-center gap-3 sm:gap-4">
+            {/* Notification Bell */}
+            <div className="relative" ref={notifDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
+                className="relative p-2 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50 cursor-pointer transition-colors"
+                aria-label="Notifications"
+              >
+                <Bell className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-600 text-[10px] font-bold text-white ring-2 ring-white dark:ring-slate-900 animate-pulse">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {notifDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-800 dark:bg-slate-900 z-50">
+                  <div className="flex items-center justify-between px-3 py-2 border-b border-slate-100 dark:border-slate-800 mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-slate-900 dark:text-slate-50">Notifications</span>
+                      {unreadCount > 0 && (
+                        <span className="text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-2 py-0.5 rounded-full font-medium">
+                          {unreadCount} new
+                        </span>
+                      )}
+                    </div>
+                    {unreadCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={markAllAsRead}
+                        className="text-xs text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 font-medium cursor-pointer"
+                      >
+                        Mark all read
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+                    {notifications.length === 0 ? (
+                      <div className="py-8 text-center text-xs text-slate-500 dark:text-slate-400">
+                        No notifications yet
+                      </div>
+                    ) : (
+                      notifications.map((notif) => (
+                        <div
+                          key={notif.id}
+                          className={`p-3 text-left transition-colors flex items-start gap-3 rounded-lg ${
+                            notif.is_read || notif.isRead
+                              ? 'opacity-70 hover:bg-slate-50 dark:hover:bg-slate-800/40'
+                              : 'bg-emerald-50/50 hover:bg-emerald-50 dark:bg-emerald-950/20 dark:hover:bg-emerald-950/40 font-medium'
+                          }`}
+                        >
+                          <div
+                            className="mt-1 h-2 w-2 rounded-full shrink-0 bg-emerald-600"
+                            style={{ visibility: notif.is_read || notif.isRead ? 'hidden' : 'visible' }}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
+                              {notif.title}
+                            </p>
+                            <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 break-words">
+                              {notif.body}
+                            </p>
+                            <span className="text-[10px] text-slate-400 mt-1 block">
+                              {new Date(notif.created_at || notif.createdAt).toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </span>
+                          </div>
+                          {!notif.is_read && !notif.isRead && (
+                            <button
+                              type="button"
+                              onClick={() => markItemAsRead(notif.id)}
+                              className="p-1 text-slate-400 hover:text-emerald-600 rounded cursor-pointer shrink-0"
+                              title="Mark as read"
+                            >
+                              <Check className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="flex items-center gap-2.5">
               <div className="h-8 w-8 rounded-full bg-emerald-100 text-emerald-800 font-semibold flex items-center justify-center text-sm border border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800 shrink-0">
                 {data?.name?.charAt(0)?.toUpperCase() || 'P'}
