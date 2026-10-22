@@ -32,7 +32,7 @@ export const JoinLanding = () => {
       let timezone = '';
       try {
         timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-      } catch (e) {}
+      } catch (e) { }
 
       api.post('/referral/track-click', {
         code,
@@ -41,7 +41,7 @@ export const JoinLanding = () => {
         screenHeight: screenH,
         pixelRatio: ratio,
         timezone,
-      }).catch(() => {});
+      }).catch(() => { });
     }
 
     if (isAndroid) {
@@ -59,7 +59,7 @@ export const JoinLanding = () => {
 
   const handleCopy = () => {
     if (code && navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(code).catch(() => {});
+      navigator.clipboard.writeText(code).catch(() => { });
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -68,7 +68,7 @@ export const JoinLanding = () => {
   const handleIosClaim = () => {
     // 1. Copy code with user touch gesture
     if (code && navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(code).catch(() => {});
+      navigator.clipboard.writeText(code).catch(() => { });
     }
     setCopied(true);
     // 2. Open App Store immediately
@@ -84,7 +84,7 @@ export const JoinLanding = () => {
           <div className="w-14 h-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-md mb-3">
             <Building2 className="h-7 w-7" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Turnkey Expense</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">TurnkeyExpense</h1>
           <p className="text-xs text-muted-foreground mt-1">Smart Rental Property & Expense Management</p>
         </div>
 
@@ -95,7 +95,7 @@ export const JoinLanding = () => {
               <span>Referral Invitation</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              You were invited to Turnkey Expense. Claim your bonus after signing up and adding your first expense.
+              You were invited to TurnkeyExpense. Claim your bonus after signing up and adding your first expense.
             </p>
           </div>
 

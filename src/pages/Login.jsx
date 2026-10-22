@@ -379,7 +379,7 @@ export const Login = () => {
 
         <CardFooter className="flex flex-col gap-2 pt-0 pb-6">
           <div className="text-xs text-center text-muted-foreground">
-            TURNKEY Expense Affiliate & Referral Network
+            TurnkeyExpense Affiliate & Referral Network
           </div>
         </CardFooter>
       </Card>
