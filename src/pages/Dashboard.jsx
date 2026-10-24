@@ -280,7 +280,7 @@ export const Dashboard = () => {
             </div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-lg tracking-tight text-slate-900 dark:text-slate-50">
-                TURNKEY<span className="text-emerald-700 dark:text-emerald-400 font-semibold text-sm ml-1">Affiliate</span>
+                TurnkeyExpense<span className="text-emerald-700 dark:text-emerald-400 font-semibold text-sm ml-1">Affiliate</span>
               </span>
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800">
                 Partner Portal
