@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import appIcon from '../assets/app-icon.png';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -275,9 +276,7 @@ export const Dashboard = () => {
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 h-16 flex items-center shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-emerald-700 flex items-center justify-center text-white font-bold text-base shadow-sm">
-              TK
-            </div>
+            <img src={appIcon} alt="TurnkeyExpense" className="h-9 w-9 rounded-xl object-contain shadow-xs" />
             <div className="flex items-center gap-2">
               <span className="font-bold text-lg tracking-tight text-slate-900 dark:text-slate-50">
                 TurnkeyExpense<span className="text-emerald-700 dark:text-emerald-400 font-semibold text-sm ml-1">Affiliate</span>

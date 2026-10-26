@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { Building2, Sparkles, Copy, Check, Apple, Smartphone } from 'lucide-react';
+import { Sparkles, Copy, Check, Apple, Smartphone } from 'lucide-react';
+import appIcon from '../assets/app-icon.png';
+import turnKeyLogoAuth from '../assets/turnKeyLogoAuth.png';
 
 import api from '../services/api';
 
@@ -80,12 +82,18 @@ export const JoinLanding = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-muted/30">
       <Card className="w-full max-w-md shadow-xl border-border/60 text-center overflow-hidden">
-        <div className="bg-primary/10 p-6 flex flex-col items-center border-b border-primary/20">
-          <div className="w-14 h-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-md mb-3">
-            <Building2 className="h-7 w-7" />
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">TurnkeyExpense</h1>
-          <p className="text-xs text-muted-foreground mt-1">Smart Rental Property & Expense Management</p>
+        <div className="bg-slate-50 dark:bg-slate-900/50 p-6 flex flex-col items-center border-b border-border/60">
+          <img
+            src={appIcon}
+            alt="TurnkeyExpense"
+            className="w-16 h-16 rounded-2xl shadow-md mb-3 object-contain"
+          />
+          <img
+            src={turnKeyLogoAuth}
+            alt="TurnkeyExpense"
+            className="h-10 w-auto object-contain mb-1"
+          />
+          <p className="text-xs text-muted-foreground">Smart Rental Property & Expense Management</p>
         </div>
 
         <CardContent className="p-6 space-y-6">

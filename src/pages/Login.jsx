@@ -4,7 +4,9 @@ import api from '../services/api';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
-import { Building2, AlertCircle, ArrowRight, ArrowLeft, KeyRound, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { AlertCircle, ArrowRight, ArrowLeft, KeyRound, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
+import turnKeyLogoAuth from '../assets/turnKeyLogoAuth.png';
+import appIcon from '../assets/app-icon.png';
 
 export const Login = () => {
   // Steps:
@@ -196,11 +198,20 @@ export const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-muted/30">
       <Card className="w-full max-w-md shadow-lg border-border/60">
-        <CardHeader className="space-y-2 text-center">
-          <div className="mx-auto w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-2">
-            <Building2 className="h-6 w-6" />
+        <CardHeader className="space-y-3 text-center pb-2">
+          <div className="flex flex-col items-center justify-center">
+            <img
+              src={turnKeyLogoAuth}
+              alt="TurnkeyExpense"
+              className="h-12 w-auto object-contain drop-shadow-xs mb-1"
+            />
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800 mt-1">
+              <span>Affiliate & Referral Partner Portal</span>
+            </div>
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">TURNKEY Affiliate Portal</CardTitle>
+          <CardTitle className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+            {step === 'setPassword' ? 'Complete Account Setup' : 'Partner Sign In'}
+          </CardTitle>
           <CardDescription>
             {step === 1 && 'Enter your registered phone number to sign in'}
             {step === 'password' && `Welcome back, ${partnerName || 'Partner'}! Enter your password.`}
