@@ -6,7 +6,7 @@ import { Sparkles, Copy, Check, Apple, Smartphone } from 'lucide-react';
 import appIcon from '../assets/app-icon.png';
 import turnKeyLogoAuth from '../assets/turnKeyLogoAuth.png';
 
-import api from '../services/api';
+import api, { API_BASE_URL } from '../services/api';
 
 const ANDROID_PACKAGE = 'com.turnKey.expense';
 const IOS_APP_ID = '6747061221';
@@ -26,37 +26,65 @@ export const JoinLanding = () => {
     const isAndroid = /android/i.test(ua);
     const isIOS = /iphone|ipad|ipod/i.test(ua);
 
-    // Track click on self-hosted backend with device fingerprinting
-    if (code) {
-      const screenW = Math.round(window.screen.width || 0);
-      const screenH = Math.round(window.screen.height || 0);
-      const ratio = Number(window.devicePixelRatio || 1).toFixed(1);
-      let timezone = '';
-      try {
-        timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-      } catch (e) { }
-
-      api.post('/referral/track-click', {
-        code,
-        platform: isAndroid ? 'android' : isIOS ? 'ios' : 'desktop',
-        screenWidth: screenW,
-        screenHeight: screenH,
-        pixelRatio: ratio,
-        timezone,
-      }).catch(() => { });
-    }
-
     if (isAndroid) {
       setIsMobileDevice(true);
       setPlatform('android');
-      // Instant Direct Store Redirect for Android
-      window.location.replace(playStoreUrl);
     } else if (isIOS) {
       setIsMobileDevice(true);
       setPlatform('ios');
-      // Instant Direct Store Redirect for iOS (App Store)
-      window.location.replace(appStoreUrl);
     }
+
+    const trackAndRedirect = async () => {
+      if (code) {
+        const screenW = Math.round(window.screen.width || 0);
+        const screenH = Math.round(window.screen.height || 0);
+        const ratio = Number(window.devicePixelRatio || 1).toFixed(1);
+        let timezone = '';
+        try {
+          timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+        } catch (e) { }
+
+        const payload = {
+          code,
+          platform: isAndroid ? 'android' : isIOS ? 'ios' : 'desktop',
+          screenWidth: screenW,
+          screenHeight: screenH,
+          pixelRatio: ratio,
+          timezone,
+        };
+
+        try {
+          const trackUrl = `${API_BASE_URL.replace(/\/$/, '')}/referral/track-click`;
+          // 1. Fire keepalive fetch / sendBeacon so browser does not abort on store redirect
+          if (typeof fetch === 'function') {
+            await Promise.race([
+              fetch(trackUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+                keepalive: true,
+              }),
+              new Promise((resolve) => setTimeout(resolve, 600)),
+            ]);
+          } else {
+            await Promise.race([
+              api.post('/referral/track-click', payload),
+              new Promise((resolve) => setTimeout(resolve, 600)),
+            ]);
+          }
+        } catch (e) { }
+      }
+
+      if (isAndroid) {
+        // Direct Store Redirect for Android after click is recorded
+        window.location.replace(playStoreUrl);
+      } else if (isIOS) {
+        // Direct Store Redirect for iOS (App Store) after click is recorded
+        window.location.replace(appStoreUrl);
+      }
+    };
+
+    trackAndRedirect();
   }, [code, playStoreUrl, appStoreUrl]);
 
   const handleCopy = () => {
