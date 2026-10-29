@@ -23,8 +23,13 @@ export const JoinLanding = () => {
 
   useEffect(() => {
     const ua = (navigator.userAgent || '').toLowerCase();
-    const isAndroid = /android/i.test(ua);
-    const isIOS = /iphone|ipad|ipod/i.test(ua);
+    const platformStr = (navigator.platform || '').toLowerCase();
+    const isIOS =
+      /iphone|ipad|ipod/i.test(ua) ||
+      /iphone|ipad|ipod/i.test(platformStr) ||
+      (platformStr === 'macintel' && navigator.maxTouchPoints > 1);
+    const isAndroid =
+      /android/i.test(ua) || /linux arm|linux aarch64/i.test(platformStr);
 
     if (isAndroid) {
       setIsMobileDevice(true);
@@ -34,57 +39,31 @@ export const JoinLanding = () => {
       setPlatform('ios');
     }
 
-    const trackAndRedirect = async () => {
+    const screenW = Math.round(window.screen.width || 0);
+    const screenH = Math.round(window.screen.height || 0);
+    const ratio = Number(window.devicePixelRatio || 1).toFixed(1);
+    let timezone = '';
+    try {
+      timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    } catch (e) { }
+
+    if (isAndroid || isIOS) {
+      const mobilePlatform = isAndroid ? 'android' : 'ios';
       if (code) {
-        const screenW = Math.round(window.screen.width || 0);
-        const screenH = Math.round(window.screen.height || 0);
-        const ratio = Number(window.devicePixelRatio || 1).toFixed(1);
-        let timezone = '';
-        try {
-          timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-        } catch (e) { }
-
-        const payload = {
-          code,
-          platform: isAndroid ? 'android' : isIOS ? 'ios' : 'desktop',
-          screenWidth: screenW,
-          screenHeight: screenH,
-          pixelRatio: ratio,
-          timezone,
-        };
-
-        try {
-          const trackUrl = `${API_BASE_URL.replace(/\/$/, '')}/referral/track-click`;
-          // 1. Fire keepalive fetch / sendBeacon so browser does not abort on store redirect
-          if (typeof fetch === 'function') {
-            await Promise.race([
-              fetch(trackUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-                keepalive: true,
-              }),
-              new Promise((resolve) => setTimeout(resolve, 600)),
-            ]);
-          } else {
-            await Promise.race([
-              api.post('/referral/track-click', payload),
-              new Promise((resolve) => setTimeout(resolve, 600)),
-            ]);
-          }
-        } catch (e) { }
+        // Route through backend /join endpoint so click + fingerprint are guaranteed
+        // to be saved in DB/memory BEFORE the 302 redirect to Play Store / App Store happens.
+        const apiRoot = API_BASE_URL.replace(/\/api\/?$/, '').replace(/\/$/, '');
+        const redirectUrl = `${apiRoot}/join?ref=${encodeURIComponent(code)}&p=${mobilePlatform}&w=${screenW}&h=${screenH}&r=${encodeURIComponent(ratio)}&tz=${encodeURIComponent(timezone)}`;
+        window.location.replace(redirectUrl);
+        return;
       }
 
       if (isAndroid) {
-        // Direct Store Redirect for Android after click is recorded
         window.location.replace(playStoreUrl);
       } else if (isIOS) {
-        // Direct Store Redirect for iOS (App Store) after click is recorded
         window.location.replace(appStoreUrl);
       }
-    };
-
-    trackAndRedirect();
+    }
   }, [code, playStoreUrl, appStoreUrl]);
 
   const handleCopy = () => {
