@@ -266,8 +266,12 @@ export const Dashboard = () => {
     }
   };
 
-  const qrCodeUrl = shareUrl
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(shareUrl)}`
+  const qrTargetUrl = data?.referral_code
+    ? `https://api.turnkeyexpense.com/join?ref=${data.referral_code}`
+    : shareUrl;
+
+  const qrCodeUrl = qrTargetUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrTargetUrl)}`
     : null;
 
   return (
